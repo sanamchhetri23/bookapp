@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Button, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import { db } from '../../firebaseService';
-import { doc, updateDoc, getDocs, query, where, collection, onSnapshot } from 'firebase/firestore';  // Import Firestore methods
+import { doc, updateDoc, getDocs, query, where, collection, onSnapshot } from 'firebase/firestore';  
 
 const MAX_BORROW_LIMIT = 3;
 
@@ -37,7 +37,7 @@ function BookDetailScreen({ route }) {
 
     const handleBorrow = async () => {
         if (borrowedBooksCount >= MAX_BORROW_LIMIT) {
-            Alert.alert('Limit Reached', 'You have already borrowed the 3 number of books.');
+            Alert.alert('Cannot Borrow', 'You have already borrowed the 3 number of books.');
         } else if (book.isBorrowed) {
             Alert.alert('This book has already been borrowed.');
         } else {
@@ -45,6 +45,7 @@ function BookDetailScreen({ route }) {
                 await updateDoc(doc(db, 'books', book.id), {
                     isBorrowed: true,
                 });
+                Alert.alert(`You have successfully borrowed "${book.title}"`)
             } catch (error) {
                 Alert.alert('Error', 'Unable to borrow the book');
             }

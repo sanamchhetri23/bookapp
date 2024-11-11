@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, Alert } from 'react-native';
-import { db } from '../../firebaseService';  
-import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';  // Firestore methods
+import { db } from '../../firebaseService';
+import { collection, query, where, onSnapshot, updateDoc, doc } from 'firebase/firestore';  
 import { TouchableOpacity } from 'react-native';
 
 function BorrowedBooksScreen() {
@@ -16,12 +16,12 @@ function BorrowedBooksScreen() {
           id: doc.id,
           ...doc.data(),
         }));
-        
+
         setBorrowedBooks(books);
       });
       return unsubscribe;
     } catch (error) {
-      console.error("Error fetching borrowed books: ", error);
+      console.error("Error fetching borrowed books data: ", error);
     }
   };
 
@@ -32,19 +32,36 @@ function BorrowedBooksScreen() {
         unsubscribe();
       }
     };
-  }, []);  
+  }, []);
 
-  const handleReturn = async (bookId) => {
-    try {
-        
-      await updateDoc(doc(db, 'books', bookId), {
-        isBorrowed: false,
-      });
-    } catch (error) {
-      console.error("Error returning book: ", error);
-      Alert.alert('Error', 'Something went wrong.');
-    }
+  const handleReturn = (bookId, bookTitle) => {
+    Alert.alert(
+      'Confirm Return',
+      `Are you sure you want to return the book: ${bookTitle}?`,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Confirm',
+          onPress: async () => {
+            try {
+              await updateDoc(doc(db, 'books', bookId), {
+                isBorrowed: false,
+              });
+              Alert.alert('Success', 'The book has been returned!');
+            } catch (error) {
+              console.error("Error returning book: ", error);
+              Alert.alert('Error', 'Something went wrong.');
+            }
+          },
+        },
+      ],
+      { cancelable: false }
+    );
   };
+
 
   return (
     <View style={styles.container}>
@@ -58,12 +75,12 @@ function BorrowedBooksScreen() {
             <View style={styles.bookItem}>
               <Text style={styles.bookName}>{item.title}</Text>
               <Text>By: {item.author}</Text>
-              <TouchableOpacity style = {styles.button}>
-              <Button
-                title="Return"
-                onPress={() => handleReturn(item.id)}
-                color={'white'}
-              />
+              <TouchableOpacity style={styles.button}>
+                <Button
+                  title="Return"
+                  onPress={() => handleReturn(item.id, item.title)}
+                  color={'white'}
+                />
               </TouchableOpacity>
             </View>
           )}
@@ -88,7 +105,7 @@ const styles = StyleSheet.create({
   bookItem: {
     marginBottom: 12,
     padding: 20,
-    backgroundColor: 'rgba(211, 211, 211, 0.5)', 
+    backgroundColor: 'rgba(211, 211, 211, 0.5)',
     borderRadius: 8
   },
   bookName: {
