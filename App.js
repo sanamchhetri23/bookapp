@@ -1,20 +1,28 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+// App.js
+import React, { useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import TabNavigator from './src/navigation/TabNavigator';
 
 export default function App() {
+  const [borrowedBooks, setBorrowedBooks] = useState([]);
+
+  const borrowBook = (book) => {
+    if (borrowedBooks.length < 3 && !borrowedBooks.some(b => b.id === book.id)) {
+      setBorrowedBooks([...borrowedBooks, book]);
+    }
+  };
+
+  const returnBook = (bookId) => {
+    setBorrowedBooks(borrowedBooks.filter(book => book.id !== bookId));
+  };
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <TabNavigator 
+        borrowBook={borrowBook} 
+        borrowedBooks={borrowedBooks} 
+        returnBook={returnBook} 
+      />
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
